@@ -1,21 +1,15 @@
 name: Vprofile CICD Workflow
-on: 
+
+on:
   push:
-    branches: 
-      - main
-
+    branches: [ "main", "develop" ]
   pull_request:
-    branches: 
-      - main
-
+    branches: [ "main", "develop" ]
   workflow_dispatch:
-
   schedule:
-    - cron: "10 14 * * 1-5"   # After noon 2:10 pm, Mondat to Friday
+    - cron: "0 2 * * *"   # nightly run at 2 AM UTC
 
-
-  
-permissions: 
+permissions:
   contents: read
 
 jobs:
@@ -23,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Code checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -54,13 +48,18 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: mvn test
 
-      - name: Checkstyle
+      - name: Run tests on develop branch
+        if: github.ref == 'refs/heads/develop'
+        run: mvn test
+
+      - name: Checkstyle (main branch only)
         if: github.ref == 'refs/heads/main'
         run: mvn checkstyle:checkstyle
 
-      - name: Run tests on other branches
-        if: github.ref != 'refs/heads/main'
-        run: echo "Skipping unit tests and code analysis"
+      - name: Skip tests on other branches
+        if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
+        run: echo "Skipping tests on this branch."
+
 
   Security_Scan:
     runs-on: ubuntu-latest
@@ -81,10 +80,8 @@ jobs:
           vuln-type: os,library
           output: trivy-results.json
 
-      - name: Upload Trivy scan results as artifact
+      - name: Upload Trivy scan results
         uses: actions/upload-artifact@v4
         with:
           name: trivy-scan-results
           path: trivy-results.json
-
-  
