@@ -61,7 +61,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: echo "SKipping tests on current branch. Tests available only on main branch"
 
-  security-scan:
+  Security_Scan:
     runs-on: ubuntu-latest
     needs: Build
     steps: 
