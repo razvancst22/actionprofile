@@ -27,6 +27,15 @@ jobs:
       - name: Maven Build
         run: mvn install
 
+      - name: Upload Build Artefact (WAR after Maven Build)
+        uses: action/upload-artifact@v4
+        with: 
+          name: vprofile-app
+          path: target/*.war
+
+      - name: Notify if the build Fails
+        if: failure()
+        run: echo "Build job Failed"
 
   Testing:
     runs-on: ubuntu-latest
@@ -38,7 +47,16 @@ jobs:
           fetch-depth: 0
 
       - name: Run tests on main branch
+        if: github.ref == 'refs/heads/main'
+        run: mvn test
+
+      - name: Run tests on develop branch
         run: mvn test
 
       - name: Checkstyle
+        if: github.ref == 'refs/heads/main'
         run: mvn checkstyle:checkstyle
+
+      - name: Run test on other branhes
+        if: github.ref == 'refs/heads/main'
+        run: echo "SKipping tests on current branch. Tests available only on main branch"
