@@ -28,7 +28,7 @@ jobs:
         run: mvn install
 
       - name: Upload Build Artefact (WAR after Maven Build)
-        uses: action/upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with: 
           name: vprofile-app
           path: target/*.war
@@ -77,7 +77,7 @@ jobs:
           scan-ref: .
           format: json
           exit-code: 0
-          vuln-type: os, library
+          vuln-type: os,library
           output: trivy-results.json
 
       - name: Upload scan results
